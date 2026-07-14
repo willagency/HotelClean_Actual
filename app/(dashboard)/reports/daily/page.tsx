@@ -60,7 +60,7 @@ export default async function DailyReportsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">日報一覧</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -92,7 +92,7 @@ export default async function DailyReportsPage({
         </div>
 
         {(hotels ?? []).length > 1 && (
-          <form className="flex items-center gap-2">
+          <form className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="month" value={yearMonth} />
             <select
               name="hotel_id"

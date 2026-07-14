@@ -15,9 +15,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col lg:flex-row">
       <AppSidebar role={profile.role} userName={profile.name} />
-      <main className="flex-1 overflow-y-auto bg-background p-8">{children}</main>
+      <main className="min-w-0 flex-1 overflow-x-hidden bg-slate-50 p-4 sm:p-6 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

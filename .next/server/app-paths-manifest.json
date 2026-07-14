@@ -1,9 +1,6 @@
 {
-  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
-  "/(dashboard)/shifts/calendar/page": "app/(dashboard)/shifts/calendar/page.js",
-  "/(dashboard)/admin/hotels/page": "app/(dashboard)/admin/hotels/page.js",
-  "/(dashboard)/admin/hotels/[id]/edit/page": "app/(dashboard)/admin/hotels/[id]/edit/page.js",
-  "/(dashboard)/reports/daily/page": "app/(dashboard)/reports/daily/page.js",
-  "/(dashboard)/reports/daily/[id]/edit/page": "app/(dashboard)/reports/daily/[id]/edit/page.js",
-  "/(dashboard)/admin/staff/page": "app/(dashboard)/admin/staff/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js"
 }

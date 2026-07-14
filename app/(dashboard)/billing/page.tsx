@@ -77,7 +77,7 @@ export default async function BillingPage({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <form className="flex items-center gap-2">
+        <form className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="month" value={yearMonth} />
           <select
             name="hotel_id"

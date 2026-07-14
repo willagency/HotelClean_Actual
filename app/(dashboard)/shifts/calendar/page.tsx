@@ -138,7 +138,7 @@ export default async function ShiftCalendarPage({
 
       {isApprover && <WeeklyHourAlertBanner alerts={weeklyHourAlerts} />}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Link href={buildHref({ ...baseParams, month: shiftYearMonth(yearMonth, -1) })}>
             <Button type="button" variant="outline" size="sm">
@@ -153,8 +153,8 @@ export default async function ShiftCalendarPage({
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
-          <form className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <form className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="month" value={yearMonth} />
             <input type="hidden" name="view" value={view} />
 
