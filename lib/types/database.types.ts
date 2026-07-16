@@ -65,6 +65,9 @@ export interface Shift {
   note: string | null;
   other_company_hours: number;
   other_company_confirmed: boolean;
+  actual_start_time: string | null;
+  actual_end_time: string | null;
+  break_minutes: number;
   created_at: string;
   updated_at: string;
 }
@@ -166,6 +169,26 @@ export interface Invoice {
 
 export interface InvoiceWithHotel extends Invoice {
   hotel: { name: string } | null;
+}
+
+export interface AttendanceRow {
+  shift_id: string;
+  staff_id: string;
+  staff_name: string;
+  is_international_student: boolean;
+  work_date: string;
+  planned_start: string;
+  planned_end: string;
+  planned_hours: number;
+  actual_start: string | null;
+  actual_end: string | null;
+  break_minutes: number;
+  actual_hours: number | null;
+  variance_hours: number | null;
+  other_company_hours: number;
+  rolling_total_hours: number;
+  hour_limit: number;
+  remaining_hours: number;
 }
 
 export interface HotelWithPrices extends Hotel {

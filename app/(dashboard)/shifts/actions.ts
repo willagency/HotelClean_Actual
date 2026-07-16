@@ -49,7 +49,9 @@ async function validateInternationalStudentHours(params: {
 
   let existingQuery = supabase
     .from("shifts")
-    .select("work_date, start_time, end_time, other_company_hours")
+    .select(
+      "work_date, start_time, end_time, other_company_hours, actual_start_time, actual_end_time, break_minutes"
+    )
     .eq("staff_id", params.staffId)
     .in("status", ["requested", "approved"])
     .gte("work_date", rangeStart)
@@ -61,11 +63,24 @@ async function validateInternationalStudentHours(params: {
 
   const { data: existingShifts } = await existingQuery;
 
-  const existingEntries = (existingShifts ?? []).map((s) => ({
-    work_date: s.work_date as string,
-    hours: calcShiftHours(s.start_time as string, s.end_time as string),
-    other_company_hours: Number(s.other_company_hours ?? 0),
-  }));
+  // 実績(タイムカード入力済み)があればそちらを優先し、未入力ならシフト予定時間で代用する。
+  // 予定と実績の乖離が問題化しているための対応。
+  const existingEntries = (existingShifts ?? []).map((s) => {
+    const hasActual = s.actual_start_time && s.actual_end_time;
+    const hours = hasActual
+      ? Math.max(
+          calcShiftHours(s.actual_start_time as string, s.actual_end_time as string) -
+            Number(s.break_minutes ?? 0) / 60,
+          0
+        )
+      : calcShiftHours(s.start_time as string, s.end_time as string);
+
+    return {
+      work_date: s.work_date as string,
+      hours,
+      other_company_hours: Number(s.other_company_hours ?? 0),
+    };
+  });
 
   const maxHours = computeMaxRollingWindowHours(existingEntries, {
     work_date: params.workDate,

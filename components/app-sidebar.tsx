@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Building2,
   CalendarDays,
+  CheckSquare,
   ClipboardList,
   FileText,
   KeyRound,
@@ -65,6 +66,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "日報入力",
     icon: ClipboardList,
     roles: ["super_admin", "manager", "checker"],
+  },
+  {
+    href: "/attendance",
+    label: "出勤状況確認",
+    icon: CheckSquare,
+    roles: ["super_admin", "manager"],
   },
   {
     href: "/targets",
