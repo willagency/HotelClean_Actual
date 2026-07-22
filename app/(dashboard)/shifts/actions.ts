@@ -113,15 +113,49 @@ export async function createShiftRequestAction(formData: FormData): Promise<Acti
 
   const hotelId = String(formData.get("hotel_id") ?? "");
   const workDate = String(formData.get("work_date") ?? "");
-  const startTime = String(formData.get("start_time") ?? "");
-  const endTime = String(formData.get("end_time") ?? "");
+  const shiftTemplateId = String(formData.get("shift_template_id") ?? "") || null;
+  let startTime = String(formData.get("start_time") ?? "");
+  let endTime = String(formData.get("end_time") ?? "");
   const note = String(formData.get("note") ?? "").trim();
   const otherCompanyHours = Number(formData.get("other_company_hours") ?? 0);
   const otherCompanyConfirmed = formData.get("other_company_confirmed") === "on";
 
-  if (!hotelId || !workDate || !startTime || !endTime) {
+  if (!hotelId || !workDate) {
     return { error: "必須項目が入力されていません。" };
   }
+
+  const supabase = createClient();
+
+  // 時間帯はクライアントの自己申告(start_time/end_time)を信用せず、
+  // shift_template_id からサーバー側で正しい時刻を引き直す。
+  if (shiftTemplateId) {
+    const { data: template } = await supabase
+      .from("shift_templates")
+      .select("start_time, end_time, hotel_id")
+      .eq("id", shiftTemplateId)
+      .maybeSingle();
+
+    if (!template || template.hotel_id !== hotelId) {
+      return { error: "選択されたシフト時間帯が見つかりません。" };
+    }
+    startTime = String(template.start_time).slice(0, 5);
+    endTime = String(template.end_time).slice(0, 5);
+  } else {
+    // テンプレート未選択の場合、そのホテルに時間帯が1件でも登録されていれば
+    // 必ずそこから選んでもらう(自由入力は許可しない)
+    const { count } = await supabase
+      .from("shift_templates")
+      .select("id", { count: "exact", head: true })
+      .eq("hotel_id", hotelId);
+
+    if ((count ?? 0) > 0) {
+      return { error: "このホテルは登録済みのシフト時間帯から選択してください。" };
+    }
+    if (!startTime || !endTime) {
+      return { error: "必須項目が入力されていません。" };
+    }
+  }
+
   if (endTime <= startTime) {
     return { error: "終了時刻は開始時刻より後にしてください。" };
   }
@@ -145,10 +179,10 @@ export async function createShiftRequestAction(formData: FormData): Promise<Acti
     return { error: validationError };
   }
 
-  const supabase = createClient();
   const { error } = await supabase.from("shifts").insert({
     staff_id: profile.id,
     hotel_id: hotelId,
+    shift_template_id: shiftTemplateId,
     work_date: workDate,
     start_time: startTime,
     end_time: endTime,
@@ -233,13 +267,33 @@ export async function createShiftForStaffAction(formData: FormData): Promise<Act
   const staffId = String(formData.get("staff_id") ?? "");
   const hotelId = String(formData.get("hotel_id") ?? "");
   const workDate = String(formData.get("work_date") ?? "");
-  const startTime = String(formData.get("start_time") ?? "");
-  const endTime = String(formData.get("end_time") ?? "");
+  const shiftTemplateId = String(formData.get("shift_template_id") ?? "") || null;
+  let startTime = String(formData.get("start_time") ?? "");
+  let endTime = String(formData.get("end_time") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
-  if (!staffId || !hotelId || !workDate || !startTime || !endTime) {
+  if (!staffId || !hotelId || !workDate) {
     return { error: "必須項目が入力されていません。" };
   }
+
+  const supabase = createClient();
+
+  if (shiftTemplateId) {
+    const { data: template } = await supabase
+      .from("shift_templates")
+      .select("start_time, end_time, hotel_id")
+      .eq("id", shiftTemplateId)
+      .maybeSingle();
+
+    if (!template || template.hotel_id !== hotelId) {
+      return { error: "選択されたシフト時間帯が見つかりません。" };
+    }
+    startTime = String(template.start_time).slice(0, 5);
+    endTime = String(template.end_time).slice(0, 5);
+  } else if (!startTime || !endTime) {
+    return { error: "必須項目が入力されていません。" };
+  }
+
   if (endTime <= startTime) {
     return { error: "終了時刻は開始時刻より後にしてください。" };
   }
@@ -256,10 +310,10 @@ export async function createShiftForStaffAction(formData: FormData): Promise<Act
   }
 
   const profile = await getCurrentProfile();
-  const supabase = createClient();
   const { error } = await supabase.from("shifts").insert({
     staff_id: staffId,
     hotel_id: hotelId,
+    shift_template_id: shiftTemplateId,
     work_date: workDate,
     start_time: startTime,
     end_time: endTime,

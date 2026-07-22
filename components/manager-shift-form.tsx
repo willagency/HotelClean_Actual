@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
-import type { Hotel, Profile } from "@/lib/types/database.types";
+import type { Hotel, Profile, ShiftTemplate } from "@/lib/types/database.types";
 
 const selectClassName =
   "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
@@ -14,15 +14,21 @@ const selectClassName =
 export function ManagerShiftForm({
   hotels,
   staffOptions,
+  templatesByHotel,
   action,
 }: {
   hotels: Hotel[];
   staffOptions: Profile[];
+  templatesByHotel: Record<string, ShiftTemplate[]>;
   action: (formData: FormData) => Promise<{ error: string | null }>;
 }) {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedHotelId, setSelectedHotelId] = useState(hotels[0]?.id ?? "");
+
+  const templatesForHotel = templatesByHotel[selectedHotelId] ?? [];
+  const hasTemplates = templatesForHotel.length > 0;
 
   async function handleSubmit(formData: FormData) {
     setErrorMessage(null);
@@ -58,7 +64,14 @@ export function ManagerShiftForm({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="hotel_id">ホテル *</Label>
-          <select id="hotel_id" name="hotel_id" required className={selectClassName}>
+          <select
+            id="hotel_id"
+            name="hotel_id"
+            required
+            value={selectedHotelId}
+            onChange={(e) => setSelectedHotelId(e.target.value)}
+            className={selectClassName}
+          >
             {hotels.map((hotel) => (
               <option key={hotel.id} value={hotel.id}>
                 {hotel.name}
@@ -74,15 +87,31 @@ export function ManagerShiftForm({
 
         <div className="flex flex-col gap-2" />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="start_time">開始時刻 *</Label>
-          <Input id="start_time" name="start_time" type="time" required />
-        </div>
+        {hasTemplates ? (
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="shift_template_id">シフト時間帯 *</Label>
+            <select id="shift_template_id" name="shift_template_id" required className={selectClassName}>
+              {templatesForHotel.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.label}({template.start_time.slice(0, 5)}〜
+                  {template.end_time.slice(0, 5)})
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="start_time">開始時刻 *</Label>
+              <Input id="start_time" name="start_time" type="time" required />
+            </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="end_time">終了時刻 *</Label>
-          <Input id="end_time" name="end_time" type="time" required />
-        </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="end_time">終了時刻 *</Label>
+              <Input id="end_time" name="end_time" type="time" required />
+            </div>
+          </>
+        )}
 
         <div className="flex flex-col gap-2 sm:col-span-2">
           <Label htmlFor="note">備考</Label>

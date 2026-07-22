@@ -15,6 +15,16 @@ function buildPricesPayload(formData: FormData, roomTypeIds: string[]) {
   }));
 }
 
+function buildShiftTemplatesPayload(formData: FormData) {
+  const raw = String(formData.get("shift_templates_json") ?? "[]");
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function createHotelAction(
   roomTypeIds: string[],
   formData: FormData
@@ -31,6 +41,7 @@ export async function createHotelAction(
     p_branch_name: String(formData.get("branch_name") ?? ""),
     p_notes: String(formData.get("notes") ?? ""),
     p_prices: buildPricesPayload(formData, roomTypeIds),
+    p_shift_templates: buildShiftTemplatesPayload(formData),
   });
 
   if (error) {
@@ -58,6 +69,7 @@ export async function updateHotelAction(
     p_branch_name: String(formData.get("branch_name") ?? ""),
     p_notes: String(formData.get("notes") ?? ""),
     p_prices: buildPricesPayload(formData, roomTypeIds),
+    p_shift_templates: buildShiftTemplatesPayload(formData),
   });
 
   if (error) {

@@ -57,6 +57,7 @@ export interface Shift {
   id: string;
   staff_id: string;
   hotel_id: string;
+  shift_template_id: string | null;
   work_date: string;
   start_time: string;
   end_time: string;
@@ -189,6 +190,29 @@ export interface AttendanceRow {
   rolling_total_hours: number;
   hour_limit: number;
   remaining_hours: number;
+}
+
+export interface ShiftTemplate {
+  id: string;
+  hotel_id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  target_headcount: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShiftTemplateStaffingRow {
+  shift_template_id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  target_headcount: number;
+  work_date: string;
+  approved_count: number;
+  diff: number;
 }
 
 export interface HotelWithPrices extends Hotel {

@@ -26,7 +26,7 @@ export default async function NewHotelPage() {
       <div>
         <h1 className="text-2xl font-semibold">新規ホテル登録</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          基本情報と客室タイプ別の単価を設定してください。
+          基本情報・客室タイプ別の単価・シフト時間帯(最大5つ)を設定してください。
         </p>
       </div>
 

@@ -4,6 +4,7 @@ import { ShiftTable } from "@/components/shift-table";
 import { ShiftCalendarGrid } from "@/components/shift-calendar-grid";
 import { ManagerShiftForm } from "@/components/manager-shift-form";
 import { WeeklyHourAlertBanner } from "@/components/weekly-hour-alert-banner";
+import { ShiftStaffingTable } from "@/components/shift-staffing-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,8 @@ import {
 import type {
   Hotel,
   Profile,
+  ShiftTemplate,
+  ShiftTemplateStaffingRow,
   ShiftWithRelations,
   UserRole,
   WeeklyHourAlert,
@@ -91,8 +94,10 @@ export default async function ShiftCalendarPage({
 
   let staffOptions: Profile[] = [];
   let weeklyHourAlerts: WeeklyHourAlert[] = [];
+  let templatesByHotel: Record<string, ShiftTemplate[]> = {};
+  let staffingRows: ShiftTemplateStaffingRow[] = [];
   if (isApprover) {
-    const [{ data: staffData }, { data: alertData }] = await Promise.all([
+    const [{ data: staffData }, { data: alertData }, { data: templateData }] = await Promise.all([
       supabase
         .from("profiles")
         .select("*")
@@ -100,9 +105,26 @@ export default async function ShiftCalendarPage({
         .order("name")
         .returns<Profile[]>(),
       supabase.rpc("get_weekly_hour_alerts", { p_year_month: yearMonth }),
+      supabase.from("shift_templates").select("*").order("sort_order").returns<ShiftTemplate[]>(),
     ]);
     staffOptions = staffData ?? [];
     weeklyHourAlerts = (alertData as WeeklyHourAlert[] | null) ?? [];
+
+    templatesByHotel = {};
+    for (const template of templateData ?? []) {
+      templatesByHotel[template.hotel_id] ??= [];
+      templatesByHotel[template.hotel_id].push(template);
+    }
+
+    // 目標稼働人員数との差分は、特定の1ホテルを選んでいる時のみ意味を持つため
+    // hotelIdが指定されている場合だけ取得する
+    if (hotelId) {
+      const { data: staffingData } = await supabase.rpc("get_shift_template_staffing", {
+        p_hotel_id: hotelId,
+        p_year_month: yearMonth,
+      });
+      staffingRows = (staffingData as ShiftTemplateStaffingRow[] | null) ?? [];
+    }
   }
 
   const baseParams = {
@@ -228,6 +250,13 @@ export default async function ShiftCalendarPage({
         />
       )}
 
+      {isApprover && hotelId && (
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">人員充足状況(目標人数との差分)</h2>
+          <ShiftStaffingTable rows={staffingRows} />
+        </div>
+      )}
+
       {isApprover && (
         <Card>
           <CardHeader>
@@ -237,6 +266,7 @@ export default async function ShiftCalendarPage({
             <ManagerShiftForm
               hotels={hotels ?? []}
               staffOptions={staffOptions}
+              templatesByHotel={templatesByHotel}
               action={createShiftForStaffAction}
             />
           </CardContent>

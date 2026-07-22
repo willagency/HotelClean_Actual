@@ -3,7 +3,12 @@ import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 import { HotelForm } from "@/components/hotel-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateHotelAction } from "@/app/(dashboard)/admin/hotels/actions";
-import type { Hotel, HotelRoomPrice, RoomType } from "@/lib/types/database.types";
+import type {
+  Hotel,
+  HotelRoomPrice,
+  RoomType,
+  ShiftTemplate,
+} from "@/lib/types/database.types";
 
 export default async function EditHotelPage({ params }: { params: { id: string } }) {
   const profile = await getCurrentProfile();
@@ -13,15 +18,22 @@ export default async function EditHotelPage({ params }: { params: { id: string }
 
   const supabase = createClient();
 
-  const [{ data: hotel }, { data: roomTypes }, { data: prices }] = await Promise.all([
-    supabase.from("hotels").select("*").eq("id", params.id).single(),
-    supabase.from("room_types").select("*").order("sort_order").returns<RoomType[]>(),
-    supabase
-      .from("hotel_room_prices")
-      .select("*")
-      .eq("hotel_id", params.id)
-      .returns<HotelRoomPrice[]>(),
-  ]);
+  const [{ data: hotel }, { data: roomTypes }, { data: prices }, { data: shiftTemplates }] =
+    await Promise.all([
+      supabase.from("hotels").select("*").eq("id", params.id).single(),
+      supabase.from("room_types").select("*").order("sort_order").returns<RoomType[]>(),
+      supabase
+        .from("hotel_room_prices")
+        .select("*")
+        .eq("hotel_id", params.id)
+        .returns<HotelRoomPrice[]>(),
+      supabase
+        .from("shift_templates")
+        .select("*")
+        .eq("hotel_id", params.id)
+        .order("sort_order")
+        .returns<ShiftTemplate[]>(),
+    ]);
 
   const typedHotel = hotel as Hotel | null;
 
@@ -52,6 +64,7 @@ export default async function EditHotelPage({ params }: { params: { id: string }
             roomTypes={roomTypes ?? []}
             initialHotel={typedHotel}
             initialPrices={initialPrices}
+            initialShiftTemplates={shiftTemplates ?? []}
             action={boundAction}
           />
         </CardContent>

@@ -8,7 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentYearMonth, getMonthRange, shiftYearMonth } from "@/lib/date-utils";
 import { createShiftRequestAction, cancelShiftRequestAction } from "@/app/(dashboard)/shifts/actions";
-import type { Hotel, ShiftWithRelations } from "@/lib/types/database.types";
+import type { Hotel, ShiftTemplate, ShiftWithRelations } from "@/lib/types/database.types";
 
 export default async function ShiftRequestPage({
   searchParams,
@@ -27,7 +27,7 @@ export default async function ShiftRequestPage({
 
   const supabase = createClient();
 
-  const [{ data: hotels }, { data: shifts }] = await Promise.all([
+  const [{ data: hotels }, { data: shifts }, { data: shiftTemplates }] = await Promise.all([
     supabase.from("hotels").select("*").order("name").returns<Hotel[]>(),
     supabase
       .from("shifts")
@@ -37,7 +37,14 @@ export default async function ShiftRequestPage({
       .lte("work_date", lastDay)
       .order("work_date", { ascending: false })
       .returns<ShiftWithRelations[]>(),
+    supabase.from("shift_templates").select("*").order("sort_order").returns<ShiftTemplate[]>(),
   ]);
+
+  const templatesByHotel: Record<string, ShiftTemplate[]> = {};
+  for (const template of shiftTemplates ?? []) {
+    templatesByHotel[template.hotel_id] ??= [];
+    templatesByHotel[template.hotel_id].push(template);
+  }
 
   const buildHref = (month: string) => `/shifts/request?month=${month}`;
 
@@ -92,6 +99,7 @@ export default async function ShiftRequestPage({
         <CardContent>
           <ShiftRequestForm
             hotels={hotels ?? []}
+            templatesByHotel={templatesByHotel}
             isInternationalStudent={profile.is_international_student}
             isLongVacationMode={profile.is_long_vacation_mode}
             action={createShiftRequestAction}

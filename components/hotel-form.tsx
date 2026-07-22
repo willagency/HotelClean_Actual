@@ -8,17 +8,20 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { RoomPriceEditor } from "@/components/room-price-editor";
-import type { Hotel, RoomType } from "@/lib/types/database.types";
+import { ShiftTemplateEditor } from "@/components/shift-template-editor";
+import type { Hotel, RoomType, ShiftTemplate } from "@/lib/types/database.types";
 
 export function HotelForm({
   roomTypes,
   initialHotel,
   initialPrices,
+  initialShiftTemplates,
   action,
 }: {
   roomTypes: RoomType[];
   initialHotel?: Hotel;
   initialPrices?: Record<string, number>;
+  initialShiftTemplates?: ShiftTemplate[];
   action: (formData: FormData) => Promise<{ error: string | null }>;
 }) {
   const router = useRouter();
@@ -97,6 +100,11 @@ export function HotelForm({
       <div>
         <h2 className="mb-3 text-sm font-semibold">客室タイプ別単価</h2>
         <RoomPriceEditor roomTypes={roomTypes} initialPrices={initialPrices} />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold">シフト時間帯(スタッフが申請時に選択)</h2>
+        <ShiftTemplateEditor initialTemplates={initialShiftTemplates ?? []} />
       </div>
 
       <div className="flex justify-end gap-3">
