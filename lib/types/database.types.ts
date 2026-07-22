@@ -215,6 +215,17 @@ export interface ShiftTemplateStaffingRow {
   diff: number;
 }
 
+export interface DailyStaffingRow {
+  shift_template_id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  default_headcount: number;
+  target_headcount: number;
+  approved_count: number;
+  diff: number;
+}
+
 export interface HotelWithPrices extends Hotel {
   hotel_room_prices: (HotelRoomPrice & { room_types: RoomType })[];
 }

@@ -97,7 +97,7 @@ export function ShiftTemplateEditor({
           </div>
           <div className="flex items-end gap-2">
             <div className="flex flex-1 flex-col gap-1.5">
-              <Label>目標人数</Label>
+              <Label>デフォルト目標人数</Label>
               <Input
                 type="number"
                 min={0}
@@ -136,6 +136,9 @@ export function ShiftTemplateEditor({
       <p className="text-xs text-muted-foreground">
         ここで登録した時間帯を、スタッフがシフト申請時に選択します。時間帯名・開始・終了を
         すべて入力した行のみ保存されます。最大{MAX_TEMPLATES}つまで登録できます。
+        「デフォルト目標人数」は日ごとの個別設定がない場合に使われる基準値です。
+        チェックアウト状況等で日によって必要人数が変わる場合は、「当日シフト状況」画面から
+        日付ごとに個別設定できます。
       </p>
     </div>
   );

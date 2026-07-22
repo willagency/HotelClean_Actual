@@ -252,7 +252,15 @@ export default async function ShiftCalendarPage({
 
       {isApprover && hotelId && (
         <div>
-          <h2 className="mb-3 text-lg font-semibold">人員充足状況(目標人数との差分)</h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">人員充足状況(目標人数との差分)</h2>
+            <Link
+              href="/shifts/staffing"
+              className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+            >
+              日ごとの目標人数を調整する →
+            </Link>
+          </div>
           <ShiftStaffingTable rows={staffingRows} />
         </div>
       )}

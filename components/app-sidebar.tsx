@@ -16,6 +16,7 @@ import {
   Send,
   Target,
   Users,
+  UsersRound,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -60,6 +61,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "シフト確認",
     icon: CalendarDays,
     roles: ["super_admin", "manager", "checker"],
+  },
+  {
+    href: "/shifts/staffing",
+    label: "当日シフト状況",
+    icon: UsersRound,
+    roles: ["super_admin", "manager"],
   },
   {
     href: "/reports/daily",
